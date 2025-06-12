@@ -1,103 +1,198 @@
-import Image from "next/image";
+"use client";
+import { useState } from "react";
 
 export default function Home() {
-  return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+  const [summary, setSummary] = useState("");
+  const [tweet, setTweet] = useState("");
+  const [topic, setTopic] = useState("");
+  const [summaryLoading, setSummaryLoading] = useState(false);
+  const [tweetLoading, setTweetLoading] = useState(false);
+  const [researchStatus, setResearchStatus] = useState("offline");
+  const [actionStatus, setActionStatus] = useState("offline");
+  const [postingStatus, setPostingStatus] = useState<"idle" | "posting" | "success" | "error">("idle");
+  const [tweetUrl, setTweetUrl] = useState("");
+  const [postError, setPostError] = useState("");
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+  const postTweet = async (tw: string) => {
+    try {
+      setPostingStatus("posting");
+      setPostError("");
+      const response = await fetch("/api/post-tweet", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ tw }),
+      });
+      
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || "Failed to post tweet");
+      }
+      
+      setTweetUrl(data.tweetUrl);
+      setPostingStatus("success");
+    } catch (error) {
+      console.error("Error posting tweet:", error);
+      setPostError(error instanceof Error ? error.message : "Failed to post tweet");
+      setPostingStatus("error");
+    }
+  };
+
+  const runAgents = async () => {
+    setSummaryLoading(true);
+    setTweetLoading(true);
+    setResearchStatus("online");
+    setPostingStatus("idle");
+    setTweetUrl("");
+    
+    const res1 = await fetch("/api/research-agent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query: topic }),
+    });
+    const data1 = await res1.json();
+    setSummary(data1.summary);
+    setSummaryLoading(false);
+    setResearchStatus("offline");
+    
+    setActionStatus("online");
+    const res2 = await fetch("/api/action-agent", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ summary: data1.summary }),
+    });
+    const data2 = await res2.json();
+    setTweet(data2.tweet);
+    setTweetLoading(false);
+    setActionStatus("offline");
+    postTweet(tweet);
+  };
+
+  const TwitterPostCard = () => (
+    <div className="min-w-lg p-4 border rounded-lg shadow-sm bg-gray-900">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-lg font-bold text-white">🐦 X Post Status</h2>
+        <div className="flex items-center gap-2">
+          <div className={`w-3 h-3 rounded-full ${
+            postingStatus === "posting" ? "bg-yellow-500 animate-pulse" :
+            postingStatus === "success" ? "bg-green-500" :
+            postingStatus === "error" ? "bg-red-500" :
+            "bg-gray-300"
+          }`} />
+          <span className="text-sm text-gray-600">
+            {postingStatus === "posting" ? "Posting..." :
+             postingStatus === "success" ? "Posted" :
+             postingStatus === "error" ? "Failed" :
+             "Ready"}
+          </span>
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      </div>
+      <div className="p-3 bg-gray-900 rounded-md min-h-[100px]">
+        {postingStatus === "idle" && (
+          <p className="text-gray-400 text-center">No tweet posted yet</p>
+        )}
+        {postingStatus === "posting" && (
+          <div className="flex flex-col items-center justify-center gap-2">
+            <p className="text-white">Posting to X...</p>
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-white"></div>
+          </div>
+        )}
+        {postingStatus === "success" && (
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-green-400">Successfully posted to X!</p>
+            <a 
+              href={tweetUrl} 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 text-sm"
+            >
+              View on X
+            </a>
+          </div>
+        )}
+        {postingStatus === "error" && (
+          <div className="flex flex-col items-center gap-2">
+            <p className="text-red-400">Failed to post tweet</p>
+            <p className="text-red-300 text-sm">{postError}</p>
+          </div>
+        )}
+      </div>
+      {tweet && postingStatus === "idle" && (
+        <div className="mt-4 flex justify-end">
+          <button
+            onClick={() => postTweet(tweet)}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-md transition-colors"
+          >
+            Post to X
+          </button>
+        </div>
+      )}
     </div>
+  );
+
+  const AgentCard = ({ title, content, loading, status, isSecondAgent }: { title: string; content: string; loading: boolean; status: string; isSecondAgent: boolean }) => (
+    <div className="min-w-lg p-4 border rounded-lg shadow-sm bg-gray-900">
+      <div className="flex items-center justify-between mb-2">
+        <h2 className="text-lg font-bold text-white">{title}</h2>
+        <div className="flex items-center gap-2">
+          <div className={`w-3 h-3 rounded-full ${status === "online" ? "bg-green-500 animate-pulse" : "bg-gray-300"}`} />
+          <span className="text-sm text-gray-600">{status === "online" ? "Generating..." : "Ready"}</span>
+        </div>
+      </div>
+      <div className="p-3 bg-gray-900 rounded-md h-[200px] overflow-y-auto">
+        <p className="whitespace-pre-wrap text-white">
+          {loading ? "Thinking..." : 
+           isSecondAgent && summaryLoading ? "Waiting for Research Agent..." :
+           content}
+        </p>
+      </div>
+    </div>
+  );
+
+  return (
+    <main className="p-4 flex flex-col items-center justify-center gap-6">
+      <h1 className="text-2xl font-bold text-white">2-Agent System</h1>
+      <input 
+        type="text" 
+        value={topic} 
+        onChange={(e) => setTopic(e.target.value)} 
+        placeholder="Enter a topic" 
+        className="w-full max-w-2xl border border-gray-300 p-2 rounded-md text-white bg-gray-900"
+      />
+      <button 
+        onClick={runAgents} 
+        className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition-colors cursor-pointer"
+      >
+        Run 2-Agent System
+      </button>
+
+      <button 
+        onClick={() => postTweet("test")} 
+        className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition-colors cursor-pointer"
+      >
+        Post Tweet
+      </button>
+      
+      <div className="w-full flex flex-col items-center gap-5">
+        <div className="flex justify-center items-center gap-5">
+          <AgentCard 
+            title="🔍 Research Agent" 
+            content={summary} 
+            loading={summaryLoading} 
+            status={researchStatus}
+            isSecondAgent={false}
+          />
+          <span className="text-white text-2xl">{"- - - - - - - - - - - -"}</span>
+          <AgentCard 
+            title="📝 Action Agent" 
+            content={tweet} 
+            loading={tweetLoading} 
+            status={actionStatus}
+            isSecondAgent={true}
+          />
+        </div>
+        <TwitterPostCard />
+      </div>
+    </main>
   );
 }

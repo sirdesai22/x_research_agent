@@ -26,8 +26,10 @@ export default function Home() {
       const data = await response.json();
       
       if (!response.ok) {
-        throw new Error(data.error || "Failed to post tweet");
+        throw new Error(data || "Failed to post tweet");
       }
+
+      console.log(data);
       
       setTweetUrl(data.tweetUrl);
       setPostingStatus("success");

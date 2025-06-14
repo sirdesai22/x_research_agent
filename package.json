@@ -15,7 +15,6 @@
     "next": "15.3.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "twitter-api-sdk": "^1.2.1",
     "twitter-api-v2": "^1.23.2"
   },
   "devDependencies": {

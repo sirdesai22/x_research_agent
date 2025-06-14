@@ -24,14 +24,13 @@ export default function Home() {
       });
       
       const data = await response.json();
-      
+      console.log(data)
+
       if (!response.ok) {
         throw new Error(data || "Failed to post tweet");
       }
 
-      console.log(data);
-      
-      setTweetUrl(data.tweetUrl);
+      setTweetUrl(String(data));
       setPostingStatus("success");
     } catch (error) {
       console.error("Error posting tweet:", error);
@@ -168,12 +167,12 @@ export default function Home() {
         Run 2-Agent System
       </button>
 
-      <button 
-        onClick={() => postTweet("test")} 
+      {/* <button 
+        onClick={() => postTweet("test tweet from 2-agent system")} 
         className="bg-blue-500 text-white p-2 rounded-md hover:bg-blue-600 transition-colors cursor-pointer"
       >
         Post Tweet
-      </button>
+      </button> */}
       
       <div className="w-full flex flex-col items-center gap-5">
         <div className="flex justify-center items-center gap-5">

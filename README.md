@@ -1,36 +1,86 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🧠 X Research Agent  
 
-## Getting Started
+An **AI-powered research and posting agent** built on top of **X OAuth + Generative AI**, designed to automate research, content generation, and publishing workflows.  
 
-First, run the development server:
+This project combines **Gemini, Tavily, and custom AI agents** (Action Agent, Post Agent, Research Agent) to help users **research topics, generate insights, and post directly on X (Twitter)** in a fully automated pipeline.  
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## ✨ Features  
+- 🔑 **X OAuth Integration** – Secure login & tokenized access to user accounts.  
+- 🤖 **AI Agents** – Modular agents for different workflows:  
+  - **Research Agent**: Collects insights from Tavily + Gemini.  
+  - **Post Agent**: Crafts engaging X posts with context-aware formatting.  
+  - **Action Agent**: Handles scheduling, replies, and follow-up actions.  
+- 🧩 **GenAI Pipeline** – Uses Gemini LLM for reasoning and Tavily for real-time data.  
+- 📊 **Customizable Prompts** – Easily adapt tone, style, and research depth.  
+- 🌐 **Next.js Frontend** – Clean UI for agent management & execution logs.  
+
+---
+
+## 🏗️ Architecture Overview  
+```mermaid
+flowchart TD
+    U[User] -->|OAuth Login| A[X OAuth]
+    A --> B[Next.js App]
+    B --> C[Agent Orchestrator]
+    C --> D[Research Agent -> Tavily API]
+    C --> E[Post Agent -> Gemini LLM]
+    C --> F[Action Agent -> X API]
+    D --> G[Aggregated Insights]
+    E --> H[Generated Posts]
+    F --> I[Publish to X]
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🛠️ Tech Stack  
+- **Frontend**: Next.js + Tailwind  
+- **Backend**: TypeScript (API Routes / Server Actions)  
+- **AI/LLMs**: Gemini (content generation)  
+- **Research API**: Tavily (real-time web/data insights)  
+- **Auth & Posting**: X OAuth + X API  
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+---
 
-## Learn More
+## ⚙️ Installation & Setup  
+```bash
+# Clone repo
+git clone https://github.com/username/x-research-agent.git
+cd x-research-agent
 
-To learn more about Next.js, take a look at the following resources:
+# Install dependencies
+npm install
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+# Setup environment
+cp .env.example .env
+# Add your X OAuth keys, Tavily API key, Gemini API key
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+# Run locally
+npm run dev
+```
 
-## Deploy on Vercel
+---
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## 📦 Example Workflow  
+1. 🔑 User logs in with **X OAuth**  
+2. 🔎 Research Agent queries Tavily for data  
+3. 🧠 Gemini processes insights → generates summary  
+4. ✍️ Post Agent formats content into X-ready posts  
+5. 🚀 Action Agent publishes or schedules to X  
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+
+## 📈 Roadmap  
+- [ ] Multi-account support  
+- [ ] Advanced post scheduling + thread generation  
+- [ ] Sentiment & engagement analysis  
+- [ ] Plugin system for new AI agents  
+
+---
+
+## 🤝 Contributing  
+1. Fork this repo  
+2. Create a new branch (`feature/your-feature`)  
+3. Commit & push changes  
+4. Open a PR  
